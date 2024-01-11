@@ -19,18 +19,18 @@
 %bcond_with python3
 %endif
 
-%global talloc_version 2.3.4
-%global tdb_version 1.4.7
-%global tevent_version 0.13.0
+%global talloc_version 2.4.0
+%global tdb_version 1.4.8
+%global tevent_version 0.14.1
 
 Name: libldb
-Version: 2.6.1
-Release: 1%{?dist}
+Version: 2.7.2
+Release: 2%{?dist}
 Summary: A schema-less, ldap like, API and database
 Requires: libtalloc%{?_isa} >= %{talloc_version}
 Requires: libtdb%{?_isa} >= %{tdb_version}
 Requires: libtevent%{?_isa} >= %{tevent_version}
-License: LGPLv3+
+License: LGPL-3.0-or-later
 URL: http://ldb.samba.org/
 Source0: https://www.samba.org/ftp/ldb/ldb-%{version}.tar.gz
 Source1: https://www.samba.org/ftp/ldb/ldb-%{version}.tar.asc
@@ -222,6 +222,12 @@ rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/_*
 %endif
 
 %changelog
+* Mon Jun 05 2023 Pavel Filipenský <pfilipen@redhat.com> - 2.7.2-2
+- resolves: rhbz#2190426 - Rebuilt to retrigger brew build
+
+* Thu May 18 2023 Pavel Filipenský <pfilipen@redhat.com> - 2.7.2-1
+- resolves: rhbz#2190426 - Rebase to version 2.7.2
+
 * Fri Oct 21 2022 Andreas Schneider <asn@redhat.com> - 2.6.1-1
 - resolves: rhbz#2131995 - Rebase to version 2.6.1
 
