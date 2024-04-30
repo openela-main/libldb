@@ -19,13 +19,13 @@
 %bcond_with python3
 %endif
 
-%global talloc_version 2.4.0
-%global tdb_version 1.4.8
-%global tevent_version 0.14.1
+%global talloc_version 2.4.1
+%global tdb_version 1.4.9
+%global tevent_version 0.15.0
 
 Name: libldb
-Version: 2.7.2
-Release: 2%{?dist}
+Version: 2.8.0
+Release: 1%{?dist}
 Summary: A schema-less, ldap like, API and database
 Requires: libtalloc%{?_isa} >= %{talloc_version}
 Requires: libtdb%{?_isa} >= %{tdb_version}
@@ -38,7 +38,6 @@ Source1: https://www.samba.org/ftp/ldb/ldb-%{version}.tar.asc
 Source2: ldb.keyring
 
 # Patches
-Patch0001: 0001-PATCH-wafsamba-Fix-few-SyntaxWarnings-caused-by-regu.patch
 
 BuildRequires: gcc
 BuildRequires: libtalloc-devel >= %{talloc_version}
@@ -222,6 +221,9 @@ rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/_*
 %endif
 
 %changelog
+* Mon Dec 04 2023 Andreas Schneider <asn@redhat.com> - 2.8.0-1
+- resolves: RHEL-16482 - Rebase version to 2.8.0
+
 * Mon Jun 05 2023 Pavel Filipenský <pfilipen@redhat.com> - 2.7.2-2
 - resolves: rhbz#2190426 - Rebuilt to retrigger brew build
 
