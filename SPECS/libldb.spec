@@ -25,7 +25,7 @@
 
 Name: libldb
 Version: 2.8.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 Summary: A schema-less, ldap like, API and database
 Requires: libtalloc%{?_isa} >= %{talloc_version}
 Requires: libtdb%{?_isa} >= %{tdb_version}
@@ -38,6 +38,7 @@ Source1: https://www.samba.org/ftp/ldb/ldb-%{version}.tar.asc
 Source2: ldb.keyring
 
 # Patches
+Patch0:        libldb-fix-indexes-performance.patch
 
 BuildRequires: gcc
 BuildRequires: libtalloc-devel >= %{talloc_version}
@@ -124,7 +125,7 @@ Development files for the Python bindings for the LDB library
 
 %prep
 zcat %{SOURCE0} | gpgv2 --quiet --keyring %{SOURCE2} %{SOURCE1} -
-%autosetup -n ldb-%{version} -p1
+%autosetup -n ldb-%{version} -p3
 
 %build
 # workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1217376
@@ -221,6 +222,9 @@ rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/_*
 %endif
 
 %changelog
+* Tue Aug 13 2024 Andreas Schneider <asn@redhat.com> - 2.8.0-2
+- resolves: RHEL-53007 -  Fix performance regression with indexes
+
 * Mon Dec 04 2023 Andreas Schneider <asn@redhat.com> - 2.8.0-1
 - resolves: RHEL-16482 - Rebase version to 2.8.0
 
