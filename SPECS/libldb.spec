@@ -1,5 +1,3 @@
-%if ((0%{?fedora} || 0%{?rhel} > 7 || 0%{?epel} > 6))
-
 # lmdb is not supported on 32 bit architectures
 %ifarch aarch64 ppc64le s390x x86_64
 %bcond_without lmdb
@@ -8,23 +6,12 @@
 #endif arch
 %endif
 
-%else
-%bcond_with lmdb
-#endif fedora || rhel || epel
-%endif
-
-%if 0%{?fedora} || 0%{?rhel} > 7
-%bcond_without python3
-%else
-%bcond_with python3
-%endif
-
-%global talloc_version 2.4.1
-%global tdb_version 1.4.9
-%global tevent_version 0.15.0
+%global talloc_version 2.4.2
+%global tdb_version 1.4.10
+%global tevent_version 0.16.1
 
 Name: libldb
-Version: 2.8.0
+Version: 2.9.1
 Release: 2%{?dist}
 Summary: A schema-less, ldap like, API and database
 Requires: libtalloc%{?_isa} >= %{talloc_version}
@@ -36,32 +23,27 @@ Source0: https://www.samba.org/ftp/ldb/ldb-%{version}.tar.gz
 Source1: https://www.samba.org/ftp/ldb/ldb-%{version}.tar.asc
 # gpg2 --no-default-keyring --keyring ./ldb.keyring --recv-keys 9147A339719518EE9011BCB54793916113084025
 Source2: ldb.keyring
+Patch0:  libldb-fix-indexes-performance.patch
 
-# Patches
-Patch0:        libldb-fix-indexes-performance.patch
-
+BuildRequires: docbook-style-xsl
+BuildRequires: doxygen
 BuildRequires: gcc
+BuildRequires: gnupg2
+BuildRequires: libcmocka-devel
 BuildRequires: libtalloc-devel >= %{talloc_version}
 BuildRequires: libtdb-devel >= %{tdb_version}
 BuildRequires: libtevent-devel >= %{tevent_version}
+BuildRequires: libxslt
+BuildRequires: make
+BuildRequires: openldap-devel
+BuildRequires: popt-devel
+BuildRequires: python3-devel
+BuildRequires: python3-talloc-devel
+BuildRequires: python3-tdb
+BuildRequires: python3-tevent
 %if %{with lmdb}
 BuildRequires: lmdb-devel >= 0.9.16
 %endif
-BuildRequires: popt-devel
-BuildRequires: libxslt
-BuildRequires: docbook-style-xsl
-%if %{with python3}
-BuildRequires: python3-devel
-BuildRequires: python3-tdb
-BuildRequires: python3-talloc-devel
-BuildRequires: python3-tevent
-#endif with python
-%endif
-BuildRequires: doxygen
-BuildRequires: openldap-devel
-BuildRequires: libcmocka-devel
-BuildRequires: gnupg2
-BuildRequires: make
 
 Provides: bundled(libreplace)
 Obsoletes: python2-ldb < 2.0.5-1
@@ -100,7 +82,6 @@ Provides: pyldb-devel%{?_isa} = %{version}-%{release}
 Development files for the Python bindings for the LDB library.
 This package includes files that aren't specific to a Python version.
 
-%if %{with python3}
 %package -n python3-ldb
 Summary: Python bindings for the LDB library
 Requires: libldb%{?_isa} = %{version}-%{release}
@@ -120,17 +101,12 @@ Requires: python-ldb-devel-common%{?_isa} = %{version}-%{release}
 
 %description -n python3-ldb-devel
 Development files for the Python bindings for the LDB library
-#endif with python
-%endif
 
 %prep
 zcat %{SOURCE0} | gpgv2 --quiet --keyring %{SOURCE2} %{SOURCE1} -
 %autosetup -n ldb-%{version} -p3
 
 %build
-# workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1217376
-export python_LDFLAGS=""
-
 %configure --disable-rpath \
            --disable-rpath-install \
            --bundled-libraries=NONE \
@@ -154,13 +130,11 @@ make %{?_smp_mflags} check
 %make_install
 
 # Install API docs
-cp -a apidocs/man/* $RPM_BUILD_ROOT/%{_mandir}
+cp -a apidocs/man/* %{buildroot}%{_mandir}
 
 # bug: remove manpage named after full file path
 # not needed with el8+ and fc28+
-rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/_*
-
-%ldconfig_scriptlets
+rm -f %{buildroot}%{_mandir}/man3/_*
 
 %files
 %dir %{_libdir}/ldb
@@ -206,7 +180,6 @@ rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/_*
 %{_includedir}/pyldb.h
 %{_mandir}/man*/Py*.gz
 
-%if %{with python3}
 %files -n python3-ldb
 %{python3_sitearch}/ldb.cpython-*.so
 %{_libdir}/libpyldb-util.cpython-*.so.2*
@@ -217,13 +190,18 @@ rm -f $RPM_BUILD_ROOT/%{_mandir}/man3/_*
 %{_libdir}/libpyldb-util.cpython-*.so
 %{_libdir}/pkgconfig/pyldb-util.cpython-*.pc
 
+%ldconfig_scriptlets
 %ldconfig_scriptlets -n python3-ldb
-#endif with python
-%endif
 
 %changelog
-* Tue Aug 13 2024 Andreas Schneider <asn@redhat.com> - 2.8.0-2
-- resolves: RHEL-53007 -  Fix performance regression with indexes
+* Mon Aug 12 2024 Andreas Schneider <asn@redhat.com> - 2.9.1-2
+* resolves: RHEL-53994 - Fix performance regression with indexes
+
+* Tue Jul 02 2024 Pavel Filipenský <pfilipen@redhat.com> - 2.9.1-1
+- related: RHEL-33757 - Rebase version to 2.9.1
+
+* Thu Apr 25 2024 Pavel Filipenský <pfilipen@redhat.com> - 2.9.0-1
+- resolves: RHEL-33757 - Rebase version to 2.9.0
 
 * Mon Dec 04 2023 Andreas Schneider <asn@redhat.com> - 2.8.0-1
 - resolves: RHEL-16482 - Rebase version to 2.8.0
